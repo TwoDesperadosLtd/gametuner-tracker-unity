@@ -24,64 +24,120 @@
  */
 
 using System;
-using UnityEngine;
 
 namespace GametunerTracker.Logging {
-	internal class Log : MonoBehaviour {
+    public interface ILogClient
+    {
+        void Error(string message);
+        void Debug(string message);
+        void Verbose(string message);
+    }
 
-		private static LoggingLevel level = LoggingLevel.Verbose;
-		private static bool logging = true;
+    internal class UnityLogClient : ILogClient
+    {
+        public void Error(string message)
+        {
+            UnityEngine.Debug.LogError(message);
+        }
 
-		/// <summary>
-		/// Writes a line either to the console or to the Unity debugger.
-		/// </summary>
-		/// <param name="message">Message to be logged.</param>
-		public static void Error(string message) {
-			if (logging && (int)level >= 1) {
-				UnityEngine.Debug.LogError("GAMETUNER: " + message);
-			}
-		}
+        public void Debug(string message)
+        {
+            UnityEngine.Debug.Log(message);
+        }
 
-		/// <summary>
-		/// Writes a line either to the console or to the Unity debugger.
-		/// </summary>
-		/// <param name="message">Message to be logged.</param>
-		public static void Debug(string message) {
-			if (logging && (int)level >= 2) {
-				UnityEngine.Debug.Log("GAMETUNER: " + message);
-			}
-		}
+        public void Verbose(string message)
+        {
+            UnityEngine.Debug.Log(message);
+        }
+    }
 
-		/// <summary>
-		/// Writes a line either to the console or to the Unity debugger.
-		/// </summary>
-		/// <param name="message">Message to be logged.</param>
-		public static void Verbose(string message) {
-			if (logging && (int)level >= 3) {
-				UnityEngine.Debug.Log("GAMETUNER: " + message);
-			}
-		}
+    internal class ConsoleLogClient : ILogClient
+    {
+        public void Error(string message)
+        {
+            Console.Error.WriteLine(message);
+        }
 
-		/// <summary>
-		/// Turns logging on.
-		/// </summary>
-		public static void On() {
-			logging = true;
-		}
+        public void Debug(string message)
+        {
+            Console.WriteLine(message);
+        }
 
-		/// <summary>
-		/// Turns logging off.
-		/// </summary>
-		public static void Off() {
-			logging = false;
-		}
+        public void Verbose(string message)
+        {
+            Console.WriteLine(message);
+        }
+    }
 
-		/// <summary>
-		/// Sets the log level.
-		/// </summary>
-		/// <param name="newLevel">New level.</param>
-		public static void SetLogLevel(LoggingLevel newLevel) {
-			level = newLevel;
-		}
+    public static class Log
+    {
+        private const string Prefix = "GAMETUNER: ";
+        private static readonly object LogLock = new object();
+
+        private static LoggingLevel level = LoggingLevel.Verbose;
+        private static bool logging = true;
+        private static ILogClient logClient = new UnityLogClient();
+
+        public static void Error(string message)
+        {
+            if (logging && (int)level >= (int)LoggingLevel.Error)
+            {
+                logClient.Error(Prefix + message);
+            }
+        }
+
+        public static void Debug(string message)
+        {
+            if (logging && (int)level >= (int)LoggingLevel.Debug)
+            {
+                logClient.Debug(Prefix + message);
+            }
+        }
+
+        public static void Verbose(string message)
+        {
+            if (logging && (int)level >= (int)LoggingLevel.Verbose)
+            {
+                logClient.Verbose(Prefix + message);
+            }
+        }
+
+        public static void On()
+        {
+            logging = true;
+        }
+
+        public static void Off()
+        {
+            logging = false;
+        }
+
+        public static void SetLogLevel(LoggingLevel newLevel)
+        {
+            level = newLevel;
+        }
+
+        public static void SetLogClient(ILogClient client)
+        {
+            if (client == null)
+            {
+                throw new ArgumentNullException(nameof(client));
+            }
+
+            lock (LogLock)
+            {
+                logClient = client;
+            }
+        }
+
+        public static void UseUnityLogger()
+        {
+            SetLogClient(new UnityLogClient());
+        }
+
+        public static void UseConsoleLogger()
+        {
+            SetLogClient(new ConsoleLogClient());
+        }
     }
 }
