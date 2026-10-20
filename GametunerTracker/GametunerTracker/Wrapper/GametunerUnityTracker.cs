@@ -47,6 +47,8 @@ namespace GametunerTracker
         private static string storeName;
         private static string appID;
         private static bool isOptOut;
+        // null if game doesn't use terms and conditions consent
+        private static bool? consentGiven;
         public delegate void OnSessionStarted(string sessionId, int sessionIndex, string previousSessionId);
         public static OnSessionStarted onSessionStartEvent;  
 
@@ -60,7 +62,8 @@ namespace GametunerTracker
         /// <param name="isSandboxEnabled">If true, events will be sent to sandbox environment</param>
         /// <param name="userID">Unique user id</param>
         /// <param name="store">Store name. Eg. GooglePlay, ITunes, Amazon...</param>
-        public static void Init(string analyticsAppID, string apiKey, bool isSandboxEnabled, string userID = null, string store = "Unknown") { 
+        /// <param name="waitForConsent">If true, events are marked as sent without consent until SetConsent(true) is called. Private data is removed from those events on server.</param>
+        public static void Init(string analyticsAppID, string apiKey, bool isSandboxEnabled, string userID = null, string store = "Unknown", bool waitForConsent = false) { 
             
             if (isInitialized) {
                 Log.Debug("Tracker is already initialized");
@@ -106,6 +109,10 @@ namespace GametunerTracker
                 }
 
                 isOptOut = GetOptOutFromDB(extendedStore);
+                consentGiven = extendedStore.GetConsent();
+                if (consentGiven == null && waitForConsent) {
+                    consentGiven = false;
+                }
 
                 subject.SetUserId(tempUserID);
                 subject.SetInstallationId(installationId);
@@ -271,6 +278,20 @@ namespace GametunerTracker
             }
 
             ((ExtendedEventStore)tracker.GetEmitter().GetEventStore()).SetOptOut(isOptedOut);
+        }
+
+        /// <summary>
+        /// Sets terms and conditions consent. Events triggered before consent is given don't contain private data.
+        /// </summary>
+        /// <param name="isConsentGiven">Did user accept terms and conditions</param>
+        public static void SetConsent(bool isConsentGiven) {
+            if (!isInitialized) {
+                Log.Error("Tracker isn't initialized");
+                return;
+            }
+
+            consentGiven = isConsentGiven;
+            ((ExtendedEventStore)tracker.GetEmitter().GetEventStore()).SetConsent(isConsentGiven);
         }
 
         /// <summary>
@@ -616,10 +637,15 @@ namespace GametunerTracker
         /// <returns>Event context data</returns>
         private static EventContext GetEventContext(string lastEventName, int eventIndex) {
 
-            return new EventContext ()
+            EventContext eventContext = new EventContext ()
                 .SetEventIndex(eventIndex)
-                .SetPreviousEventName(lastEventName)
-                .Build ();
+                .SetPreviousEventName(lastEventName);
+
+            if (consentGiven.HasValue) {
+                eventContext.SetConsentGiven(consentGiven.Value);
+            }
+
+            return eventContext.Build ();
         }
     }
 }

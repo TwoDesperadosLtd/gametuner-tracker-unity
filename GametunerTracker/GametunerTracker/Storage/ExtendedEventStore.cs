@@ -43,6 +43,7 @@ namespace GametunerTracker.Storage
         private const string COLLECTION_METADATA_INSTALLATION_ID        = "installationId";
         private const string COLLECTION_METADATA_REGISTRATION_TIME      = "registrationTime";
         private const string COLLECTION_METADATA_OPT_OUT                = "optOut";
+        private const string COLLECTION_METADATA_CONSENT                = "consent";
 
         public ExtendedEventStore(string filename = "snowplow_events_lite.db") : base(filename) { 
             try
@@ -510,6 +511,69 @@ namespace GametunerTracker.Storage
             catch (Exception e)
             {
                 Log.Error("EventStore: UserID failed to save");
+                Log.Error(e.ToString());
+                return false;
+            }
+            finally
+            {
+                _dbLock.ExitWriteLock();
+            }
+        }
+
+        /// <summary>
+        /// Gets terms and conditions consent.
+        /// </summary>
+        /// <returns>Consent, null if it was never set</returns>
+        public bool? GetConsent() { 
+            try
+            {
+                _dbLock.EnterReadLock();
+                var colData = _db.GetCollection<EventsMetaData>(COLLECTION_METADATA);
+
+                var result = colData.FindOne(x => x.Id == COLLECTION_METADATA_CONSENT);
+                if (result == null) {
+                    return null;
+                }
+
+                return Convert.ToBoolean(result.ValueInt);
+            }
+            catch (Exception e)
+            {
+                Log.Error($"EventStore: Get consent failed");
+                Log.Error(e.ToString());
+                return null;
+            }
+            finally
+            {
+                _dbLock.ExitReadLock();
+            }
+        }
+
+        /// <summary>
+        /// Update terms and conditions consent.
+        /// </summary>
+        /// <returns>Is consent updated</returns>
+        public bool SetConsent(bool consentGiven)
+        {
+            try
+            {
+                _dbLock.EnterWriteLock();
+                var colData = _db.GetCollection<EventsMetaData>(COLLECTION_METADATA);
+
+                var result = colData.FindOne(x => x.Id == COLLECTION_METADATA_CONSENT);
+                EventsMetaData metadata = new EventsMetaData { Id = COLLECTION_METADATA_CONSENT, ValueInt = Convert.ToInt32(consentGiven) };
+
+                if (result == null) { 
+                    colData.Insert(metadata);
+                } else {
+                    colData.Update(metadata);
+                }
+               
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.Error("EventStore: Consent failed to save");
                 Log.Error(e.ToString());
                 return false;
             }

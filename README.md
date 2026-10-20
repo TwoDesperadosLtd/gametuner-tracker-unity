@@ -76,6 +76,22 @@ GametunerUnityTracker.SetUserId(userID);
 
 Plugin will handle caching of userID and triggered events.
 
+### Terms and conditions consent
+
+If your game asks user to accept terms and conditions, initialize plugin with ```waitForConsent``` set to ```true```. Until consent is given, events are marked as sent without consent and private data (parameters flagged as GDPR in GameTuner) is removed from them on server. Events like first open and login are still tracked.
+
+```csharp
+GametunerUnityTracker.Init(analyticsAppID, apiKey, isSandboxEnabled, userID, store, waitForConsent: true);
+```
+
+When user accepts terms and conditions call:
+
+```csharp
+GametunerUnityTracker.SetConsent(true);
+```
+
+Consent is cached, so it has to be set only once. If ```waitForConsent``` is not set, plugin behaves as before and all events contain private data.
+
 To trigger analytics event use:
 
 ```csharp

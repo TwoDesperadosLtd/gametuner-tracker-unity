@@ -1,6 +1,6 @@
 {
     "name": "com.algebraai.gametunertracker",
-    "version": "0.7.8",
+    "version": "0.7.9",
     "displayName": "GameTuner Tracker SDK",
     "description": "Add analytics to your Unity games and apps with the GameTuner event tracker for Unity.",
     "unity": "2020.1",  

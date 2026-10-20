@@ -1,3 +1,8 @@
+Version 0.07.09 (2026-10-20)
+--------------------------
+Add terms and conditions consent (Init waitForConsent parameter, SetConsent method)
+Send consent_given in event context, private data is removed on server from events sent before consent
+
 Version 0.07.08 (2023-09-21)
 --------------------------
 Extend common events trigger methods with optional parameter for event

@@ -47,6 +47,16 @@ namespace GametunerTracker.Payloads.Contexts
 			this.DoAdd(Constants.EVENT_PREVIOUS_EVENT, previousEvent);
 			return this;
 		} 
+
+        /// <summary>
+        /// Sets if user accepted terms and conditions before event was triggered
+        /// </summary>
+        /// <param name="consentGiven">Consent given</param>
+        /// <returns>EventContext</returns>
+        public EventContext SetConsentGiven(bool consentGiven) {
+			this.DoAdd(Constants.EVENT_CONSENT_GIVEN, consentGiven);
+			return this;
+		}
 		
 		public override EventContext Build() {
 			this.schema = Constants.SCHEMA_EVENT_CONTEXT;

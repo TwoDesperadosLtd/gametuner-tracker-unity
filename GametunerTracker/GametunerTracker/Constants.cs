@@ -35,7 +35,7 @@ namespace GametunerTracker {
 		public readonly static string SCHEMA_UNSTRUCT_EVENT  		= "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0";
 		public readonly static string SCHEMA_DEVICE_CONTEXT  		= "iglu:com.algebraai.gametuner.embedded_context/device_context/jsonschema/1-0-0";
 		public readonly static string SCHEMA_SESSION_CONTEXT 		= "iglu:com.algebraai.gametuner.embedded_context/session_context/jsonschema/1-0-0";
-		public readonly static string SCHEMA_EVENT_CONTEXT   		= "iglu:com.algebraai.gametuner.context/event_context/jsonschema/1-0-0";
+		public readonly static string SCHEMA_EVENT_CONTEXT   		= "iglu:com.algebraai.gametuner.context/event_context/jsonschema/1-0-1";
         public readonly static string EVENT_LOGIN_SCHEMA 	 		= "iglu:com.algebraai.gametuner.event/login/jsonschema/1-0-0";
 		public readonly static string EVENT_FIRST_OPEN_SCHEMA 		= "iglu:com.algebraai.gametuner.event/first_open/jsonschema/1-0-1";
 		public readonly static string EVENT_LOGOUT_SCHEMA 			= "iglu:com.algebraai.gametuner.event/logout/jsonschema/1-0-0";
@@ -84,6 +84,7 @@ namespace GametunerTracker {
 		//Event Context
 		public readonly static string EVENT_INDEX	 	    = "event_index"; 
 		public readonly static string EVENT_PREVIOUS_EVENT  = "previous_event"; 
+		public readonly static string EVENT_CONSENT_GIVEN   = "consent_given";
         public readonly static string EVENT_BUNDLE_ID 		= "event_bundle_id";
 		public readonly static string EVENT_IS_ONLINE  		= "is_online";
 
